@@ -1,0 +1,7 @@
+[package]
+name = "mnist2octave"
+version = "0.1.0"
+authors = ["de <git.daniele@gmail.com>"]
+
+[dependencies]
+rustml = { git = "https://github.com/daniel-e/rustml.git" }
