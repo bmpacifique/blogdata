@@ -109,8 +109,8 @@ Now, you can start the svm script with `octave -q svm.m` or by starting Octave a
 In the following table the accuracy (proportion of correctly classified examples) and the time required for training and testing is summarized for each learning algorithm.
 
 | Method | Time for training | Time for classification | Accuracy |
-|--------|:-----------------:|:-----------------------:|---------:|
-| kNN    |     0s            |  ?                      | 96.80%   |
+|--------|------------------:|------------------------:|---------:|
+| kNN    |     0s            |  86min 17s              | 96.80%   |
 | SVM    |     ?             |                         | 93.56%   |
 
 ## Sources
