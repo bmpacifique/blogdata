@@ -1,4 +1,4 @@
-# Kaggle "Digit Recognizer"
+# Kaggle "Digit Recognizer" Competition
 
 In [Kaggle](https://www.kaggle.com)'s "Digit Recognizer" competition the task is to correctly recognize handwritten digits between 0 and 9 (inclusive). The digits are taken from the famous [MNIST database of handwritten digits](http://yann.lecun.com/exdb/mnist/) which is a popular benchmarking dataset for this task. The original dataset contains 60,000 digits for training and 10,000 examples in the test set. In the Kaggle competition the training set contains 42,000 examples and 28,000 examples in the test set.
 
@@ -27,7 +27,7 @@ Each line removes the first line of the csv file which is just the description o
 
 It's time for action!
 
-We write a script which reads the training and test set, predicts the label for each example in the test set and writes the result (i.e. the labels for each example in the test set) into a file in a format that can be uploaded directly to the Kaggle competition without any additional postprocessing. The script is shown below:
+We write a script which reads the training and test set, predicts the label for each example in the test set and writes the result (i.e. the labels for each example in the test set) into a file in a format that can be uploaded directly to the Kaggle competition without any additional postprocessing. The script is saved into the file `knn.m` and is shown below:
 
 ```matlab
 1;
@@ -59,7 +59,7 @@ for i = 1:m
 	[tmp, idx] = sort(r);
 	labels = y(idx(1:k), 1);
 
-	% count the occurences of each label
+	% count the occurrences of each label
 	u = unique(labels);
 	counts = arrayfun(@(x) sum(labels == x), u);
 	[tmp, idx] = sort(counts, 'descend');
@@ -85,25 +85,35 @@ csvwrite('result_knn.txt', p, '-append');
 
 To execute the script we change into the directory where the files `train.txt.gz` and `test.txt.gz` are located. Then we start Octave and in Octave we can simply start the script by typing `knn`. Alternatively, we can also start the script on the command line via `octave -q knn`. However, running a script in the Octave environment has the advantage that we can run it several times (e.g. with different parameters) without reloading the dataset each time.
 
-When the script has been executed the result in written into the file `result_knn.txt`.
+When the script is finished the result is stored in the file `result_knn.txt`.
 
 ## SVM
 
+[Support Vector Machines (SVM)](https://en.wikipedia.org/wiki/Support_vector_machine) are also a very popular learning algorithm for classification tasks. Because Octave has no built-in support for Support Vector Machines we have to use a third party library. Fortunately [LIBSVM](https://www.csie.ntu.edu.tw/~cjlin/libsvm/) provides an interface for MATLAB and Octave so it is well suited for our purpose. We just have to download the latest version which can also be found in this repository and have to compile the sources. Just execute the commands on the command line shown below:
 
-```
+```bash
 tar xzf libsvm-3.20.tar.gz
 cd libsvm-3.20/matlab
 octave
 octave:1> make
 octave:2> quit
 cd ../..
-octave -q svm.m
 ```
 
+Note: If the `make` fails it is very likely that you are missing the development packacke of Octave. On Ubuntu you can install this package with `sudo apt-get install liboctave-dev`.
+
+Now, you can start the svm script with `octave -q svm.m` or by starting Octave and typing `svm` on the Octave prompt. The result is stored in the file `result_svm.txt`.
+
 ## Summary of performance
+
+In the following table the accuracy (proportion of correctly classified examples) and the time required for training and testing is summarized for each learning algorithm.
 
 | Method | Time for training | Time for classification | Accuracy |
 |--------|:-----------------:|:-----------------------:|---------:|
 | kNN    |     0s            |  ?                      | 96.80%   |
 | SVM    |     ?             |                         | 93.56%   |
+
+## Sources
+
+The sources are available on [GitHub](https://github.com/daniel-e/blogdata/tree/master/kaggle/digit-recognizer).
 

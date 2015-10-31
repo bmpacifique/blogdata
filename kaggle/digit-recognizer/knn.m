@@ -27,7 +27,7 @@ for i = 1:m
 	[tmp, idx] = sort(r);
 	labels = y(idx(1:k), 1);
 
-	% count the occurences of each label
+	% count the occurrences of each label
 	u = unique(labels);
 	counts = arrayfun(@(x) sum(labels == x), u);
 	[tmp, idx] = sort(counts, 'descend');
