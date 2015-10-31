@@ -6,31 +6,89 @@ In [Kaggle](https://www.kaggle.com)'s "Digit Recognizer" competition the task is
 
 A very simply classifier is the [k-nearest neighbor](https://en.wikipedia.org/wiki/K-nearest_neighbors_algorithm). It's some kind of brute force approach which I use quite often to get a first impression about the difficulty of the problem. kNN does not require a training phase but uses the whole training set as its model. Each unknown example that we want to classify is simply compared to all examples in the training set (that's why I like it to compare this algorithm with a brute force approach) for which the classes are known and a voting decides to which class the unknown example will be assigned to. Concretely, I compute the Euclidean distance between the unknown example and all training examples. Then, I take the k examples from the training set which are closest to the unknown example (i.e. for which the Euclidean distance is smallest) and select the class which occurs most often among those k examples.
 
-[Octave](https://www.gnu.org/software/octave/) which is an open source alternative for MATLAB is well suited for this task because kNN can be implemented with just a few lines of codes and because the dataset can be modified interactively. Before we can start with Octave we need to convert the data into an appropriate format.
+This approach is computational expensive. The naive implementation takes O(nm) time (n = number of training examples, m = number of dimensions) to compute the distance between the unkown example and all examples in the training set plus the time required to find the k smallest distances which is O(n log n) for a naive implementation. Nevertheless, for a first impression the naive approach is quite useful and while the classification is running I use the time to start thinking about the problem.
+
+[Octave](https://www.gnu.org/software/octave/) is an open source alternative for MATLAB and is well suited for this task because kNN can be implemented with just a few lines of codes and because the dataset can be modified interactively.
 
 ### Preprocessing
 
-Before we can load the datasets into Octave we need to do some preprocessing to convert them into a readable format. Furthermore, we compress the data to reduce the requirements for storage, to safe bandwidth when syncing the data, etc. We download the original csv files and execute the following commands on the command line:
+Before we can load the datasets into Octave we need to do some preprocessing to convert them into a readable format. Furthermore, we compress the data to reduce the requirements for storage, to safe bandwidth when syncing the data, etc. I like to keep everything small. The smaller the repository the faster I can start with my experiments when cloning the repository on another computer.
+
+We download the original csv files and execute the following commands on the command line:
 
 ```bash
 tail -n +2 train.csv | tr ',' ' ' | gzip > train.txt.gz
 tail -n +2 test.csv | tr ',' ' ' | gzip > test.txt.gz
 ```
 
-Each line removes the first line of the csv file which is just a description of the fields in the csv file. Then, commas are replaced by spaces and finally this data is compressed and is written into `train.txt.gz` and `test.txt.gz` respectively. I have added both files to the repository so that this step can also be skipped.
+Each line removes the first line of the csv file which is just the description of the fields in the csv file. Then, commas are replaced by spaces and finally this data is compressed and is written into `train.txt.gz` and `test.txt.gz` respectively. I have added both files to the repository so that this step can also be skipped.
 
 ### Running
 
-This is a very simple kNN approach in Octave for the Kaddle "Digit Recognizer" competition. The score that this solution achieves on the test dataset during the open competition is: 0.96800
+It's time for action!
 
-```bash
-octave -q knn.m
+We write a script which reads the training and test set, predicts the label for each example in the test set and writes the result (i.e. the labels for each example in the test set) into a file in a format that can be uploaded directly to the Kaggle competition without any additional postprocessing. The script is shown below:
+
+```matlab
+1;
+more off;
+
+% load the dataset if not loaded yet; if we execute the script more than
+% once in the same environment this safes some time
+if exist('X') == 0
+	display('loading datasets ...');
+	data = load('train.txt.gz');
+	X = data(:, 2:end) ./ 255;
+	y = data(:, 1);
+	t = load('test.txt.gz') ./ 255;
+end
+
+m = size(t, 1); % number of test examples
+k = 5;          % number of neighbors to examine
+
+l = [];
+tic
+for i = 1:m
+	% subtract the example t(i, :) from each row in X
+	d = bsxfun(@minus, X, t(i, :));
+	% sum the squared elements for each row and compute the square root
+	% for each sum
+	r = sqrt(sumsq(d, 2));
+
+	% sort the distances and get the labels of the first k items
+	[tmp, idx] = sort(r);
+	labels = y(idx(1:k), 1);
+
+	% count the occurences of each label
+	u = unique(labels);
+	counts = arrayfun(@(x) sum(labels == x), u);
+	[tmp, idx] = sort(counts, 'descend');
+
+	% append the predicted label to l
+	l = [l; u(idx(1, 1))];
+	printf(' %d / %d\r', i, m);
+end
+printf('\n');
+toc
+
+% output is matrix
+% each row stores the result for one example in the test set
+% the first column denotes the imageid
+% the second column denotes the predicted class
+p = [(1:m)', l];
+
+f = fopen('result_knn.txt', 'w');
+fdisp(f, 'imageid,label');
+fclose(f);
+csvwrite('result_knn.txt', p, '-append');
 ```
 
+To execute the script we change into the directory where the files `train.txt.gz` and `test.txt.gz` are located. Then we start Octave and in Octave we can simply start the script by typing `knn`. Alternatively, we can also start the script on the command line via `octave -q knn`. However, running a script in the Octave environment has the advantage that we can run it several times (e.g. with different parameters) without reloading the dataset each time.
+
+When the script has been executed the result in written into the file `result_knn.txt`.
 
 ## SVM
 
-0.93557
 
 ```
 tar xzf libsvm-3.20.tar.gz
@@ -41,3 +99,11 @@ octave:2> quit
 cd ../..
 octave -q svm.m
 ```
+
+## Summary of performance
+
+| Method | Time for training | Time for classification | Accuracy |
+|--------|:-----------------:|:-----------------------:|---------:|
+| kNN    |     0s            |  ?                      | 96.80%   |
+| SVM    |     ?             |                         | 93.56%   |
+
