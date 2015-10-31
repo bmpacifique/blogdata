@@ -111,7 +111,7 @@ In the following table the accuracy (proportion of correctly classified examples
 | Method | Time for training | Time for classification | Accuracy |
 |--------|------------------:|------------------------:|---------:|
 | kNN    |     0s            |  86min 17s              | 96.80%   |
-| SVM    |     ?             |                         | 93.56%   |
+| SVM    |     5min 14s      |  12mn 40s               | 93.56%   |
 
 ## Sources
 
