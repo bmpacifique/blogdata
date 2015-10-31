@@ -31,7 +31,7 @@ toc
 p = [(1:m)', l];
 
 
-f = fopen('result.txt', 'w');
+f = fopen('result_knn.txt', 'w');
 fdisp(f, 'imageid,label');
 fclose(f);
-csvwrite('result.txt', p, '-append');
+csvwrite('result_knn.txt', p, '-append');
