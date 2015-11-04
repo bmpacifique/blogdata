@@ -1,26 +1,31 @@
 1;
 more off;
 
+% load the dataset: trainX, trainY, testX, testY
 if exist('trainX') == 0
 	display('loading the dataset ...');
 	load('mnist.txt.gz');
 end
 
+% preprocessing of the datasets
 X = trainX ./ 255;
-Y = testX ./ 255;
+t = testX ./ 255;
 
-m = size(testX, 1);  % number of test examples
-k = 5;               % number of neighbours to examine
+% settings
+if exist('m') == 0
+	m = size(t, 1);  % number of test examples
+end
+if exist('k') == 0
+	k = 5;    % number of neighbors to examine
+end
+printf('m = %d, k = %d\n', m, k);
 
+% prediction
 c = 0;
 for i = 1:m
-	% compute the euclidean distance
-	% first, substract the test example from each row of X
-	d = bsxfun(@minus, X, Y(i, :));
-	% second, sum up the squared values of each row and compute the square root
+	d = bsxfun(@minus, X, t(i, :));
 	r = sqrt(sumsq(d, 2));
 	[tmp, idx] = sort(r);
-	% get the labels of the k nearest neighbours
 	labels = trainY(idx(1:k), 1);
 	u = unique(labels);
 	counts = arrayfun(@(x) sum(labels == x), u);
@@ -33,3 +38,5 @@ for i = 1:m
 end
 printf("\n");
 
+% accuracy
+acc = c / m
